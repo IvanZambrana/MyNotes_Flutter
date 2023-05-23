@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
-import '../constants/routes.dart';
-import '../enums/menu_action.dart';
-import '../services/crud/notes_service.dart';
+import '../../constants/routes.dart';
+import '../../enums/menu_action.dart';
+import '../../services/crud/notes_service.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -13,12 +13,11 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-
   late final NotesService _notesService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
 
   @override
-  void initState(){
+  void initState() {
     _notesService = NotesService();
     super.initState();
   }
@@ -33,8 +32,14 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Main UI'),
+        title: const Text('Your Notes'),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(newNoteRoute);
+            },
+            icon: const Icon(Icons.add),
+          ),
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
               switch (value) {
@@ -66,19 +71,18 @@ class _NotesViewState extends State<NotesView> {
       body: FutureBuilder(
         future: _notesService.getOrCreateUser(email: userEmail),
         builder: (context, snapshot) {
-          switch (snapshot.connectionState){
+          switch (snapshot.connectionState) {
             case ConnectionState.done:
               return StreamBuilder(
-                stream: _notesService.allNotes,
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState){
-                    case ConnectionState.waiting:
-                      return const Text('Waiting for all notes...');
-                    default: 
-                      return  const CircularProgressIndicator();
-                  }
-                }
-              );
+                  stream: _notesService.allNotes,
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return const Text('Waiting for all notes...');
+                      default:
+                        return const CircularProgressIndicator();
+                    }
+                  });
             default:
               return const CircularProgressIndicator();
           }
